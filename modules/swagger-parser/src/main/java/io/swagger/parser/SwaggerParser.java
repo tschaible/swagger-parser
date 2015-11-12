@@ -31,7 +31,9 @@ public class SwaggerParser {
         output = new Swagger20Parser().readWithInfo(location, auths);
         if (output != null) {
             if(output.getSwagger() != null && "2.0".equals(output.getSwagger().getSwagger())) {
-                output.setSwagger(new SwaggerResolver(output.getSwagger(), auths, location).resolve());
+                if(resolve) {
+                    output.setSwagger(new SwaggerResolver(output.getSwagger(), auths, location).resolve());
+                }
                 return output;
             }
         }
@@ -41,7 +43,9 @@ public class SwaggerParser {
                 return output;
             }
         }
-        return null;
+        output = new SwaggerDeserializationResult();
+        output.message("The swagger definition could not be read");
+        return output;
     }
 
     public Swagger read(String location) {

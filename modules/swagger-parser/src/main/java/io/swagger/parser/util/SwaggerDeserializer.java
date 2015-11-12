@@ -1,33 +1,5 @@
 package io.swagger.parser.util;
 
-import static io.swagger.models.properties.PropertyBuilder.PropertyId.DEFAULT;
-import static io.swagger.models.properties.PropertyBuilder.PropertyId.ENUM;
-import static io.swagger.models.properties.PropertyBuilder.PropertyId.EXCLUSIVE_MAXIMUM;
-import static io.swagger.models.properties.PropertyBuilder.PropertyId.EXCLUSIVE_MINIMUM;
-import static io.swagger.models.properties.PropertyBuilder.PropertyId.FORMAT;
-import static io.swagger.models.properties.PropertyBuilder.PropertyId.MAXIMUM;
-import static io.swagger.models.properties.PropertyBuilder.PropertyId.MAX_ITEMS;
-import static io.swagger.models.properties.PropertyBuilder.PropertyId.MAX_LENGTH;
-import static io.swagger.models.properties.PropertyBuilder.PropertyId.MINIMUM;
-import static io.swagger.models.properties.PropertyBuilder.PropertyId.MIN_ITEMS;
-import static io.swagger.models.properties.PropertyBuilder.PropertyId.MIN_LENGTH;
-import static io.swagger.models.properties.PropertyBuilder.PropertyId.PATTERN;
-import static io.swagger.models.properties.PropertyBuilder.PropertyId.TYPE;
-import static io.swagger.models.properties.PropertyBuilder.PropertyId.UNIQUE_ITEMS;
-
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.LinkedHashMap;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.TreeMap;
-import java.util.Collections;
-
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.JsonNodeType;
@@ -69,6 +41,10 @@ import io.swagger.models.parameters.RefParameter;
 import io.swagger.models.properties.Property;
 import io.swagger.models.properties.PropertyBuilder;
 import io.swagger.util.Json;
+
+import java.util.*;
+
+import static io.swagger.models.properties.PropertyBuilder.PropertyId.*;
 
 public class SwaggerDeserializer {
     static Set<String> ROOT_KEYS = new HashSet<String>(Arrays.asList("swagger", "info", "host", "basePath", "schemes", "consumes", "produces", "paths", "definitions", "parameters", "responses", "securityDefinitions", "security", "tags", "externalDocs"));
@@ -201,6 +177,11 @@ public class SwaggerDeserializer {
                     result.extra(location, key, node.get(key));
                 }
             }
+        }
+        else {
+            result.invalidType("", "", "object", node);
+            result.invalid();
+            return null;
         }
         return swagger;
     }
@@ -561,8 +542,6 @@ public class SwaggerDeserializer {
                     map.put(ENUM, _enum);
                 }
 
-
-
                 Property prop = PropertyBuilder.build(type, format, map);
 
                 if(prop != null) {
@@ -583,6 +562,9 @@ public class SwaggerDeserializer {
                         result.extra(location, key, obj.get(key));
                     }
                 }
+
+                String collectionFormat = getString("collectionFormat", obj, false, location, result);
+                sp.setCollectionFormat(collectionFormat);
 
                 output = sp;
             }
@@ -691,7 +673,7 @@ public class SwaggerDeserializer {
             impl.setFormat(value);
 
             value = getString("discriminator", node, false, location, result);
-            impl.setDescription(value);
+            impl.setDiscriminator(value);
 
             JsonNode xml = node.get("xml");
             if(xml != null) {

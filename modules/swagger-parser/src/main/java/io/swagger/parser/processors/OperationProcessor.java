@@ -12,8 +12,6 @@ import java.util.Map;
 
 
 public class OperationProcessor {
-
-
     private final ParameterProcessor parameterProcessor;
     private final ResponseProcessor responseProcessor;
     private final ResolverCache cache;
@@ -47,5 +45,4 @@ public class OperationProcessor {
             }
         }
     }
-
 }
